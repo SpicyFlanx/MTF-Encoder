@@ -1,6 +1,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+static int LINE_MAX_LENGTH = 80;
+static int WORD_MAX_LENGTH = 20;
+
+
 // prototype encode
 int encode (FILE * textfile, FILE *output); 
 
@@ -10,6 +14,8 @@ int encode (FILE * textfile, FILE *output);
 int main(int argc, char **argv) {
 	char *infilename[];
 	char outfilename[];
+        char line[LINE_MAX_LENGTH];
+	EncodedWord *list;
 
 	if (argc < 1) {
 		exit(1);
@@ -19,9 +25,22 @@ int main(int argc, char **argv) {
 	FILE *in_file = fopen(infilename, "r");
 	FILE *out_file = fopen("vapenation.mtf", "w");
 
-	out_file = magic_number(out_file); // Write magic number
+	out_file = magic_number(out_file);
 
-	// while there's more lines to read:
+
+
+        while (fgets(line, sizeof(line), file)) {
+        	// While there's lines to read:
+        	// tokenize up to space
+	        token = strtok(line, " ");
+                while (token != NULL) {
+			
+			// keep tokenizing!
+                        token = strtok(NULL, " ");
+                }
+        }
+
+           // while there's more lines to read:
 		// read line
 		// tokenize line
 		// assign numbers to new words
@@ -43,26 +62,29 @@ FILE * magic_number(FILE * out_file) {
 }
 	
 // We'll do a linked list of these fellers
+// On second thought, don't really need this
+/*
 typedef struct EncodedWord EncodedWord;
 struct EncodedWord {
 		char *word;
 		int value;
 		EncodedWord *next;
 	}
+*/
 
 // Prepend an EncodedWord to linkedlist
-EncodedWord *prepend(EncodedWord *list, EncodedWord *word) {
+char* prepend(char *list, char word) {
 	word -> next = list;
 	return word; // new list address
 }
 
 // Append an EncodedWord to linkedlist
-EncodedWord *postpend(EncodedWord *list, EncodedWord *word) {
+char* postpend(EncodedWord *list, EncodedWord *word) {
 
 }
 
 // Delete a word from the list
-EncodedWord *delete(EncodedWord *list, char word) {
+char* delete(EncodedWord *list, char word) {
 
 }
 
@@ -80,6 +102,19 @@ int encode (FILE * textfile, FILE * output) {
 	// get line
 	// tokenize line
 	// str -> endcodedword
+	
+	// Read, tokenize each line
+	char line[LINE_MAX_LENGTH];
+        while (fgets(line, sizeof(line), file)) {
+                token = strtok(line, " ");
+                while (token != NULL) {
+			
+                        token = strtok(NULL, " ");
+                }
+        }
+		
+
+
 
 	int wordpos = lookup_word(list, );
 
@@ -99,14 +134,13 @@ int encode (FILE * textfile, FILE * output) {
 
 // Refactor these
 char[] readLine(FILE *file) {
-	char line[80];
-	fscanf(fptr, "%[^\n]", line);
-	return line;
-	/*
+	char line[LINE_MAX_LENGTH];
 	while (fgets(line, sizeof(line), file)) {
-		// fug
+		token = strtok(line, " ");
+		while (token != NULL) {
+	    		token = strtok(NULL, " ");
+		}	
 	}
-	*/
 }
 
 something tokenizeLine(somethingelse thestring) {
@@ -117,5 +151,4 @@ something tokenizeLine(somethingelse thestring) {
 		token = strtok(NULL, " ");
 	}
 	// jeep jeep
-	return 
-}
+	return}
