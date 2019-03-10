@@ -15,15 +15,17 @@ def encode_main():
     while True:
          try:
             line = [i.readline().split()]
+            print(line)
             # Read and tokenize a line
             for word in line:
+            	print(word)
                 # do the stuff
-                if not (word in wordlist):
+                if word in wordlist:
+                    print(wordlist.index(word) + 1)
+                else: 
                     wordlist.insert(0, word) # Prepend word onto wordlist
                     n = str(len(wordlist))
                     print(n + " " + "word")
-                else: 
-                    print(wordlist.index(word) + 1)
 
          except StopIteration:
             # Stop if there's nothing left
