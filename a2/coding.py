@@ -52,6 +52,7 @@ def encode_main():
                     n = len(wordlist) # seems like a hack but hey, it works
                     o.write(bytes([128 + n]))
                     o.write(word.encode('ascii'))
+            o.write('\n'.encode('ascii'))
 
     i.close()
     o.close()
@@ -83,20 +84,43 @@ def decode_main():
         # First byte will be mtf symbol byte, and loop invariant should make
         # this land on such a byte in each loop
 
-        # Check if it's a new word
-        if int.from_bytes(nextbyte, sys.byteorder) - 128 > len(wordlist):
-            # Yes, it is
+        # Check if it's a new word, or maybe a newline
+
+        if nextbyte == b'\n':
+            # Newline
+            o.write('\n')
+            nextbyte = i.read(1)
+            # print ('memed')
+
+        elif int.from_bytes(nextbyte, sys.byteorder) - 128 > len(wordlist):
+            # Word we haven't yet encountered
             nextbyte = i.read(1)
             word = ''
-            while (int.from_bytes(nextbyte, sys.byteorder) < 129) & (nextbyte != b''):
+
+            while ( 
+                    (int.from_bytes(nextbyte, sys.byteorder) < 129) 
+                    & (nextbyte != b'') & (nextbyte != b'\n')
+                  ): # Read until another symbol char, or a newline, or EOF
+
                 word += nextbyte.decode('ascii')
                 nextbyte = i.read(1)
-            print(word + " " + str(len(wordlist)))
+
+            o.write(word)
+            if (nextbyte != b'') & (nextbyte != b'\n'):
+                o.write(' ') # Add a space only between words
             wordlist.append(word)
+
         else:
             # No, it isn't
-            print(int.from_bytes(nextbyte, sys.byteorder))
-            nextbyte = i.read(1)
+            n = len(wordlist) - (int.from_bytes(nextbyte, sys.byteorder) - 128)
+            word = wordlist[n]
+            wordlist.remove(word)
+            wordlist.append(word)
+            # print(word)
+            o.write(word)
+            if (nextbyte != b'') & (nextbyte != b'\n'):
+                o.write(' ') # Add a space only between words
+            nextbyte = i.read(1) 
     
 
 
@@ -123,7 +147,11 @@ def decode_main():
     for i in range(4):
         num.append()
     '''
-    print(wordlist)
+    # print(wordlist)
+
+    i.close()
+    o.close()
+    sys.exit()
 
 # Open the file
 
