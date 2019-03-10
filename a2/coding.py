@@ -20,7 +20,8 @@ def encode_main():
                 # do the stuff
                 if not (word in wordlist):
                     wordlist.insert(0, word) # Prepend word onto wordlist
-                    print(len(wordlist) + " " + "word")
+                    n = str(len(wordlist))
+                    print(n + " " + "word")
                 else: 
                     print(wordlist.index(word) + 1)
 
@@ -51,6 +52,11 @@ if __name__ == "__main__" and command == "text2mtf.py":
     encode_main()
 elif __name__ == "__main__" and command == "mtf2text.py":
     decode_main()
+'''
+elif __name__ == "__main__" and command == "ayylmao.py":
+	print("ayylmao")
+	encode_main()
+'''
 
 
 
