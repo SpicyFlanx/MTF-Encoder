@@ -9,7 +9,7 @@ def encode_main():
 
     # Get output filename, create output file with .mtf
     filename = sys.argv[1].split(".")[0]
-    o = open(filename + ".mtf")
+    o = open(filename + ".mtf", "w+")
     wordlist = []
 
     while True:
