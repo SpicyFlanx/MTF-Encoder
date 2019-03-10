@@ -1,38 +1,53 @@
 import sys
 import os
-#from tokenize import tokenize, STRING
+import time
+import binascii
 
 def write_magic_number(mtf):
-    pass
+    # 0xba  0x5e 0xba 0x11
+    # this code basically copied from: 
+    # https://github.com/gordillo99/Python-MTF-Encoder/blob/master/mtfcoding2.py
+    num = bytearray()
+    num.append(0xba)
+    num.append(0x5e)
+    num.append(0xba)
+    num.append(0x11)
+    mtf.write(num)
 
 def encode_main():
 
     # Get output filename, create output file with .mtf
     filename = sys.argv[1].split(".")[0]
-    o = open(filename + ".mtf", "w+")
+    o = open(filename + ".mtf", "wb")
+    write_magic_number(o)
     wordlist = []
+    # out = b''
+    # outarr = array('B')
 
-    while True:
-         try:
-            line = [i.readline().split()]
-            print(line)
-            # Read and tokenize a line
-            for word in line:
-            	print(word)
+    for line in i:
+            splitline = line.split()
+            # Tokenize the line
+            for word in splitline:
                 # do the stuff
                 if word in wordlist:
-                    print(wordlist.index(word) + 1)
+                    # Word appears: fetch index, move to front
+                    n = wordlist.index(word) + 1
+                    o.write(bytes([128 + n])) # write ascii char
+                    wordlist.remove(word)
+                    wordlist.insert(0, word)
                 else: 
-                    wordlist.insert(0, word) # Prepend word onto wordlist
-                    n = str(len(wordlist))
-                    print(n + " " + "word")
+                    # Word doesn't appear: add to list
+                    wordlist.insert(0, word)
+                    n = len(wordlist) # seems like a hack but hey, it works
+                    o.write(bytes([128 + n]))
+                    o.write(word.encode('ascii'))
 
-         except StopIteration:
-            # Stop if there's nothing left
-            break 
          
 
 def decode_main():
+
+    filename = sys.argv[1].split(".")[0]
+    o = open(filename + ".txt", "w+")
     print("decode")
     # Eat all women
 
@@ -49,15 +64,20 @@ except:
     sys.exit()
 
 
+decode_main()
+
+'''
 command = os.path.basename(__file__)
 if __name__ == "__main__" and command == "text2mtf.py":
     encode_main()
 elif __name__ == "__main__" and command == "mtf2text.py":
     decode_main()
 '''
+
+'''
 elif __name__ == "__main__" and command == "ayylmao.py":
-	print("ayylmao")
-	encode_main()
+    print("ayylmao")
+    encode_main()
 '''
 
 
