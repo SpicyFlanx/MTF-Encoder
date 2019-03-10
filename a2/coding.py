@@ -18,7 +18,7 @@ def encode_main():
             # Read and tokenize a line
             for word in line:
                 # do the stuff
-                if !(word in wordlist):
+                if not (word in wordlist):
                     wordlist.insert(0, word) # Prepend word onto wordlist
                     print(len(wordlist) + " " + "word")
                 else: 
