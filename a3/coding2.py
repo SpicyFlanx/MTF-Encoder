@@ -67,9 +67,6 @@ def encode(filename):
 
 def decode(filename):
 
-    def check_if_new_word(case):
-        pass
-
     # Open input, output files
     try:
         i = open(filename, 'rb')
@@ -94,7 +91,8 @@ def decode(filename):
 
 
         coded_int = int.from_bytes(nextbyte, sys.byteorder)
-        print("Words: " + str(len(wordlist)))
+        # print("Words: " + str(len(wordlist)))
+        # print("durr " + str(coded_int))
 
         # Deal with newlines
         if nextbyte == b'\n':
@@ -135,17 +133,32 @@ def decode(filename):
         # Case 3
         elif coded_int == 250:
             # Three bytes of encoded chars
-            print("case 3")
-            nextbyte = i.read(1)
-            code = int.from_bytes(nextbyte, sys.byteorder) * 256
-            print("code byte 1: " + str(nextbyte))
-            nextbyte = i.read(1)
-            code += int.from_bytes(nextbyte, sys.byteorder)
-            nextbyte = i.read(1)
-            print(code)
+            # print("Case 3")
 
-            if code > len(wordlist):
-                # New word
+            firstbyte = int.from_bytes(i.read(1), sys.byteorder)
+            secondbyte = int.from_bytes(i.read(1), sys.byteorder)
+            # Get the code from bytes by doing some cheeky math
+            code = (firstbyte * 256) + 376
+            code += secondbyte
+
+            
+            if code <= len(wordlist): # Not a new word
+                # Get the word from the list and print
+                n = len(wordlist) - code
+                # print("Accessing " + str(n))
+                word = wordlist[n]
+                o.write(word)
+                # Do the MTF stuff
+                wordlist.remove(word)
+                wordlist.append(word)
+                nextbyte = i.read(1) # advance to next code byte
+                if (nextbyte != b'') & (nextbyte != b'\n'):
+                    o.write(' ')
+
+            else: # new word
+                nextbyte = i.read(1) # Read first byte of word
+                word = ''
+
                 while ( 
                     (int.from_bytes(nextbyte, sys.byteorder) < 129) 
                     & (nextbyte != b'') & (nextbyte != b'\n')
@@ -158,20 +171,12 @@ def decode(filename):
                 if (nextbyte != b'') & (nextbyte != b'\n'):
                     o.write(' ') # Add a space only between words
                 wordlist.append(word)
-            else: 
-                # Not new word
-                n = len(wordlist) - (code + 1)
-                print("attempting to access wordlist index " + str(n))
-                word = wordlist[n]
-                wordlist.remove(word)
-                wordlist.append(word)
-                o.write(word)
-                nextbyte = i.read(1)
-                if (nextbyte != b'') & (nextbyte != b'\n'):
-                    o.write(' ') # Add a space only between words
 
         # Case 1
         else:
+            # print(coded_int - 128) 
+            # print(len(wordlist))
+
             if coded_int - 128 > len(wordlist):
                 # Word we haven't yet encountered
                 nextbyte = i.read(1)
@@ -192,8 +197,8 @@ def decode(filename):
             else:
                 # Word already encountered
                 # Resolve symbol into index on wordlist
-                n = len(wordlist) - (int.from_bytes(nextbyte, sys.byteorder) - 128)
-                print("attempting to access wordlist index " + str(n))
+                n = len(wordlist) - (coded_int - 128)
+                # print("attempting to access wordlist index " + str(n))
                 word = wordlist[n]
                 wordlist.remove(word) # Do the MTF stuff
                 wordlist.append(word)
@@ -201,8 +206,6 @@ def decode(filename):
                 nextbyte = i.read(1) 
                 if (nextbyte != b'') & (nextbyte != b'\n'):
                     o.write(' ') # Add a space only between words
-
-
 
         '''
         elif int.from_bytes(nextbyte, sys.byteorder) - 128 > len(wordlist):
