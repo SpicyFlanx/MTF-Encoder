@@ -169,24 +169,25 @@ int decode(FILE *input, FILE *output) {
     	}
 
 		// Case 2
-		/*
+		
     	else if (c == 249) {
     		printf ("Case 2 \n");
-    		// two bytes of encoding
-    		c = fgetc( input );
-    		if (c + 121 > wordlistcount) {
-    			// New word
-    			c = fgetc(input); // First byte of new word
+    		// extra byte of encoding
+    		c = fgetc( input ); // Get code byte
+    		printf("word uhh thing %d \n", c);
+    		printf("wordlistcount %d \n", wordlistcount);
 
-    			    			// Allocate memory for word
-    			char *word;
+    		if (c + 121 > wordlistcount) {
+
+    			c = fgetc(input); // get first char of word
+    			int count = 0;
+
+    			char *word; // Allocate memory for word
     			word = (char *) malloc( sizeof(char) );
     			if (word == NULL) {
     				fprintf(stderr, "Malloc error! ");
     				abort();
     			}
-
-    			int count = 0;
 
     			while (c < 129 && c != '\n' && !feof(input) ) {
     				word[count] = c;
@@ -201,7 +202,6 @@ int decode(FILE *input, FILE *output) {
     				count++;
     				c = fgetc(input);
     				// !! this ends on a symbol byte! !!
-
     			}
 
     			// End the string so we don't print gobbledygook
@@ -209,18 +209,30 @@ int decode(FILE *input, FILE *output) {
 
     			Word *new = newWord(word);
     			wordlist = prepend(wordlist, new);
-    			// printAllWords(wordlist);
-    			// printf("aaaa new word %s \n", new->word);
-				// printf("to file: %s \n", word);
+    			printf("New word: %s \n", new->word);
+    			fputs(new->word, output);
+    			if (c != '\n' && c != EOF) { // Add spaces only between words
+					fputc(' ', output);
+				}
 
-
-    			printf("\n");
-
-    			wordlistcount++;
-			
+    			wordlistcount++; 
     		} else {
-    			// old word
+    			int n = (c + 121);
+    			printf("case 2 fetch %d \n", n);
+    			char *oldword = fetchAtIndex(wordlist, n)->word;
+    			printf("Old word: %s \n", oldword); // debug
+    			
+    			// MTF stuff
+    			Word *mtf = newWord(oldword);
+    			wordlist = removeWord(wordlist, oldword);
+    			wordlist = prepend(wordlist, mtf);
+
+    			fputs(oldword, output);
+    			
     			c = fgetc(input);
+				if (c != '\n' && c != EOF) {
+					fputc(' ', output);
+				}
     		}
     	}
     	
@@ -238,7 +250,7 @@ int decode(FILE *input, FILE *output) {
     		} else {
     			// Old word
     		}
-    	}*/
+    	}
 
     	// Case 1
     	else {
@@ -246,16 +258,14 @@ int decode(FILE *input, FILE *output) {
     		if (c - 128 > wordlistcount) {
 
     			c = fgetc(input); // get first char of word
+    			int count = 0;
 
-    			// Allocate memory for word
-    			char *word;
+    			char *word; // Allocate memory for word
     			word = (char *) malloc( sizeof(char) );
     			if (word == NULL) {
     				fprintf(stderr, "Malloc error! ");
     				abort();
     			}
-
-    			int count = 0;
 
     			while (c < 129 && c != '\n' && !feof(input) ) {
     				word[count] = c;
@@ -270,7 +280,6 @@ int decode(FILE *input, FILE *output) {
     				count++;
     				c = fgetc(input);
     				// !! this ends on a symbol byte! !!
-
     			}
 
     			// End the string so we don't print gobbledygook
@@ -280,14 +289,15 @@ int decode(FILE *input, FILE *output) {
     			wordlist = prepend(wordlist, new);
     			printf("New word: %s \n", new->word);
     			fputs(new->word, output);
-    			fputc(' ', output);
+    			if (c != '\n' && c != EOF) { // Add spaces only between words
+					fputc(' ', output);
+				}
 
     			wordlistcount++;
 			
     		} else {
 
     			int n = (c-128);
-    			// printf("lookup index %d", n);
     			char *oldword = fetchAtIndex(wordlist, n)->word;
     			printf("Old word: %s \n", oldword); // debug
     			
@@ -297,22 +307,12 @@ int decode(FILE *input, FILE *output) {
     			wordlist = prepend(wordlist, mtf);
 
     			fputs(oldword, output);
-    			fputc(' ', output);
-
-
-
-
-
+    			
     			c = fgetc(input);
+				if (c != '\n' && c != EOF) {
+					fputc(' ', output);
+				}
 
-    			// Not a new word
-    			// resolve symbol into wordlist index
-
-
-
-    			// Write out the word
-    			// Add a space between words
-			
     		}
 
     	}
@@ -321,7 +321,7 @@ int decode(FILE *input, FILE *output) {
 
     // printAtIndex(wordlist, 15);
     printf("\n");
-    printAllWords(wordlist);
+    // printAllWords(wordlist);
 	return 0;
 
 }
