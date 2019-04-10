@@ -213,7 +213,7 @@ int decode(FILE *input, FILE *output) {
 
     			Word *new = newWord(word);
     			wordlist = prepend(wordlist, new);
-    			printf("New word: %s \n", new->word);
+    			//printf("New word: %s \n", new->word);
     			fputs(new->word, output);
     			if (c != '\n' && c != EOF) { // Add spaces only between words
 					fputc(' ', output);
@@ -225,7 +225,7 @@ int decode(FILE *input, FILE *output) {
     			int n = (c + 121);
     			printf("fetch %d \n", n);
     			char *oldword = fetchAtIndex(wordlist, n)->word;
-    			printf("Old word: %s \n", oldword); // debug
+    			//printf("Old word: %s \n", oldword); // debug
     			
     			// MTF stuff
     			Word *mtf = newWord(oldword);
@@ -282,7 +282,7 @@ int decode(FILE *input, FILE *output) {
 
     			Word *new = newWord(word);
     			wordlist = prepend(wordlist, new);
-    			printf("New word: %s \n", new->word);
+    			// printf("New word: %s \n", new->word);
     			fputs(new->word, output);
     			if (c != '\n' && c != EOF) { // Add spaces only between words
 					fputc(' ', output);
@@ -294,7 +294,7 @@ int decode(FILE *input, FILE *output) {
     			// Old word
 
     			char *oldword = fetchAtIndex(wordlist, n)->word; 
-    			printf("Old word: %s \n", oldword); // debug
+    			// printf("Old word: %s \n", oldword); // debug
     			
     			// MTF stuff
     			Word *mtf = newWord(oldword);
@@ -345,7 +345,7 @@ int decode(FILE *input, FILE *output) {
 
     			Word *new = newWord(word);
     			wordlist = prepend(wordlist, new);
-    			printf("New word: %s \n", new->word);
+    			//printf("New word: %s \n", new->word);
     			fputs(new->word, output);
     			if (c != '\n' && c != EOF) { // Add spaces only between words
 					fputc(' ', output);
@@ -357,7 +357,7 @@ int decode(FILE *input, FILE *output) {
 
     			int n = (c-128);
     			char *oldword = fetchAtIndex(wordlist, n)->word;
-    			printf("Old word: %s \n", oldword); // debug
+    			//printf("Old word: %s \n", oldword); // debug
     			
     			// MTF stuff
     			Word *mtf = newWord(oldword);
