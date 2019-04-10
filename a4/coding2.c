@@ -223,7 +223,7 @@ int decode(FILE *input, FILE *output) {
     		} else {
 
     			int n = (c + 121);
-    			printf("fetch %d \n", n);
+    			//printf("fetch %d \n", n);
     			char *oldword = fetchAtIndex(wordlist, n)->word;
     			//printf("Old word: %s \n", oldword); // debug
     			
@@ -378,7 +378,7 @@ int decode(FILE *input, FILE *output) {
     }
 
     // printAtIndex(wordlist, 15);
-    printf("\n");
+    // printf("\n");
     // printAllWords(wordlist);
 	return 0;
 
