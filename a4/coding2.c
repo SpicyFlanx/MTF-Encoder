@@ -17,7 +17,84 @@ int encode(FILE *input, FILE *output) {
     return 0;
 }
 
+
 // Wordlist struct here
+typedef struct Word Word;
+struct Word {
+	char *word;
+	Word *next;
+
+};
+
+Word *prepend(Word *wordlist, Word *new_word);
+Word *removeWord(Word *wordlist, char *word);
+Word *fetchAtIndex(Word *wordlist, int index);
+Word *newWord(char *word);
+
+
+Word *newWord(char *word) {
+	Word *newp;
+
+	newp = (Word *) malloc(sizeof(Word));
+	if (newp == NULL) {
+		fprintf(stderr, "malloc of %u bytes failed", sizeof(Word));
+		exit(1);
+	}
+	newp->word = word;
+}
+
+Word *prepend(Word *wordlist, Word *new_word) {
+	new_word -> next = wordlist;
+	return new_word;
+}
+
+Word *removeWord(Word *wordlist, char *word) {
+	// Copied from the slides lmao
+	Word *curr, *prev;
+
+	prev = NULL;
+	for (curr = wordlist; curr != NULL; curr = curr -> next) {
+		// Iterate thru and look for word
+		if (strcmp(word, curr -> word) == 0) {
+			if (prev == NULL) {
+				// First thing in list is to be removed
+ 				wordlist = curr -> next;
+			} else {
+				prev -> next = curr -> next;
+			}
+			free(curr);
+			return wordlist;
+		}
+		prev = curr;
+	}
+	fprintf(stderr, "removeWord: %s not found", word);
+	exit(1);
+}
+
+Word *fetchAtIndex(Word *wordlist, int index) {
+	Word *curr = wordlist;
+	printf("searching for index %d ", index);
+	int count = 0;
+	while (curr != NULL) {
+		printf("%s ", curr->word);
+		if (count == index) {
+			return(curr);
+		}
+		count++;
+		curr = curr->next;
+	}
+	fprintf(stderr, "fuckup supreme");
+	exit(1);
+
+}
+
+void *printAllWords(Word *wordlist) {
+	Word *curr = wordlist;
+  	while (curr != NULL) {
+  		printf("%s", curr -> word); 
+  		curr = curr -> next;
+  	}
+}
 
 
 int decode(FILE *input, FILE *output) {
@@ -34,14 +111,16 @@ int decode(FILE *input, FILE *output) {
     fputc('\n', stderr);
     
     // Check magicnum
+    /*
     if (strcmp(read_magicnum, magic_number_1) != 0 
     	&& strcmp(read_magicnum, magic_number_2) != 0) {
     		fprintf(stderr, "Error: magic number not found!");
     		exit(1);
-    }
+    }*/
     
     int c;
     int wordlistcount = 0;
+    Word *wordlist;
     // need linkdlist for words
 
     // read
@@ -66,58 +145,80 @@ int decode(FILE *input, FILE *output) {
     	// deal with newline
     	if (c == '\n') {
     		fputc( c , output );
+    		c = fgetc(input);
     	}
 
 		// Case 2
     	else if (c == 249) {
     		printf ("Case 2 \n");
+    		c = fgetc( input );
     	}
     	
     	// Case 3
     	else if (c == 250) {
     		printf ("Case 3 \n");
+    		c = fgetc( input );
     	}
 
     	else {
-    		printf ("Case 1 \n");
+    		// printf ("Case 1 \n");
 
-    		printf("Wordlist length: %d symbol thingy: %d  %c \n", wordlistcount, c-128, c);
+    		// printf("Wordlist length: %d symbol thingy: %d  %c \n", wordlistcount, c-128, c);
     		
     		// new word
-    		if (c - 128 > wordlistcount) { // TODO: determine if c - 128 > # words on list
-    			printf("New word: ");
+    		if (c - 128 > wordlistcount) {
+    			//printf("New word: ");
 
-    			c = fgetc(input); // First char of word
+    			c = fgetc(input); // get first char of word
 
     			// Allocate memory for word
-    			// Make it have space for 20 chars cause why not
-    			char* word = (char*) malloc( sizeof(char)*20 );
-    			if (!word) {
+    			char *word;
+    			word = (char *) malloc( sizeof(char) );
+    			if (word == NULL) {
     				fprintf(stderr, "Malloc error! ");
     				abort();
     			}
 
     			int count = 0;
-    			while (c < 129 && c != '\n' && !feof(input) ) {
-    				// printf("aaaa");
-    				fprintf(stderr, "%c", c);
-    				// Read until another symbol char, or newline, or EOF
-    				// add each char to word
-    				// realloc if more space needed
-    				// word[count] = c;
-    				c = fgetc(input);
-    			}
-    			free(word);
 
-    			// write word to file
-    			// write a space between words
-    			// prepend / append word to list
+    			while (c < 129 && c != '\n' && !feof(input) ) {
+    				word[count] = c;
+    				char *newpointer = realloc(word, sizeof(char) * (count + 2));
+    				// +1 because count starts at 0 and +1 for end char
+    				// realloc every char probably not very efficient but it is easy
+    				if (newpointer == NULL) {
+    					fprintf(stderr, "realloc error! ");
+    					exit(1);
+    				}
+    				word = newpointer;
+    				count++;
+    				// printf("count: %d \n", count);
+    				c = fgetc(input);
+    				// !! this ends on a symbol byte! !!
+
+    			}
+
+    			// End the string so we don't print gobbledygook
+    			word[count] = '\0';
+
+    			// printf("word length: %d \n", sizeof(word) / sizeof(word[0]));
+    			Word *new = newWord(word);
+    			wordlist = prepend(wordlist, new);
+    			// printAllWords(wordlist);
+    			printf("aaaa new word %s \n", new->word);
+				printf("to file: %s \n", word);
+
+
     			printf("\n");
-    			//printf("%d", c);
+
     			wordlistcount++;
+    			free(word);
 			
     		} else {
     			printf("Old word, number %d \n", c-128);
+    			printf("%d", fetchAtIndex(wordlist, c-128));
+
+
     			c = fgetc(input);
 
     			// Not a new word
