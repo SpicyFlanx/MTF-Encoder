@@ -243,17 +243,70 @@ int decode(FILE *input, FILE *output) {
     	
     	// Case 3
     	else if (c == 250) {
-    		printf ("Case 3 \n");
+    		// printf ("Case 3 \n");
     		// 3 bytes of encoding
     		// Get encoding bytes and do the math
     		int n = (fgetc(input) * 256) + 376;
     		n += (fgetc(input));
 
     		
-    		if (n < wordlistcount) {
-    			// old word
+    		if (n > wordlistcount) {
+    			// new word
+    			c = fgetc(input); // get first char of word
+    			int count = 0;
+
+    			char *word; // Allocate memory for word
+    			word = (char *) malloc( sizeof(char) );
+    			if (word == NULL) {
+    				fprintf(stderr, "Malloc error! ");
+    				abort();
+    			}
+
+    			while (c < 129 && c != '\n' && !feof(input) ) {
+    				word[count] = c;
+    				char *newpointer = realloc(word, sizeof(char) * (count + 2));
+    				// +1 because count starts at 0 and +1 for end char
+    				// realloc every char probably not very efficient but it is easy
+    				if (newpointer == NULL) {
+    					fprintf(stderr, "realloc error! ");
+    					exit(1);
+    				}
+    				word = newpointer;
+    				count++;
+    				c = fgetc(input);
+    				// !! this ends on a symbol byte! !!
+    			}
+
+    			// End the string so we don't print gobbledygook
+    			word[count] = '\0';
+
+    			Word *new = newWord(word);
+    			wordlist = prepend(wordlist, new);
+    			printf("New word: %s \n", new->word);
+    			fputs(new->word, output);
+    			if (c != '\n' && c != EOF) { // Add spaces only between words
+					fputc(' ', output);
+				}
+
+    			wordlistcount++;
+
     		} else {
     			// Old word
+
+    			char *oldword = fetchAtIndex(wordlist, n)->word; 
+    			printf("Old word: %s \n", oldword); // debug
+    			
+    			// MTF stuff
+    			Word *mtf = newWord(oldword);
+    			wordlist = removeWord(wordlist, oldword);
+    			wordlist = prepend(wordlist, mtf);
+
+    			fputs(oldword, output);
+    			
+    			c = fgetc(input);
+				if (c != '\n' && c != EOF) {
+					fputc(' ', output);
+				}
     		}
     	}
 
