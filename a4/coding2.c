@@ -128,7 +128,7 @@ int decode(FILE *input, FILE *output) {
     }
     read_magicnum[4] = '\0';
     
-    fputc('\n', stderr);
+    // fputc('\n', stderr);
     
     // Check magicnum
     
