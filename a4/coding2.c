@@ -138,7 +138,7 @@ int decode(FILE *input, FILE *output) {
     		exit(1);
     }
     
-    int c;
+    unsigned int c;
     int wordlistcount = 0;
     Word *wordlist = NULL; // holy frig didn't explicitly set this to null and it 
     					   // totally destroyed my linkedlist functions
@@ -171,11 +171,15 @@ int decode(FILE *input, FILE *output) {
 		// Case 2
 		
     	else if (c == 249) {
-    		printf ("Case 2 \n");
+    		//printf ("Case 2 \n");
     		// extra byte of encoding
     		c = fgetc( input ); // Get code byte
-    		printf("word uhh thing %d \n", c);
-    		printf("wordlistcount %d \n", wordlistcount);
+    		if (ferror(input)) {
+    			printf("read error!\n" );
+    		}
+
+    		//printf("word uhh thing %d \n", c);
+    		//printf("wordlistcount %d \n", wordlistcount);
 
     		if (c + 121 > wordlistcount) {
 
@@ -217,8 +221,9 @@ int decode(FILE *input, FILE *output) {
 
     			wordlistcount++; 
     		} else {
+
     			int n = (c + 121);
-    			printf("case 2 fetch %d \n", n);
+    			printf("fetch %d \n", n);
     			char *oldword = fetchAtIndex(wordlist, n)->word;
     			printf("Old word: %s \n", oldword); // debug
     			
