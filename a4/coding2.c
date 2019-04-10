@@ -28,7 +28,7 @@ struct Word {
 
 Word *prepend(Word *wordlist, Word *new_word);
 Word *removeWord(Word *wordlist, char *word);
-//Word *fetchAtIndex(Word *wordlist, int index);
+Word *fetchAtIndex(Word *wordlist, int index);
 Word *newWord(char *word);
 
 
@@ -41,6 +41,7 @@ Word *newWord(char *word) {
 		exit(1);
 	}
 	newp->word = word;
+	newp->next = NULL;
 }
 
 Word *prepend(Word *wordlist, Word *new_word) {
@@ -71,15 +72,15 @@ Word *removeWord(Word *wordlist, char *word) {
 	exit(1);
 }
 
-/*
+
 Word *fetchAtIndex(Word *wordlist, int index) {
 	Word *curr = wordlist;
-	printf("first word: %s", curr->word);
-	printf("searching for index %d ", index);
+	// printf("first word: %s", curr->word);
+	// printf("searching for index %d \n", index);
 	int count = 0;
 	while (curr != NULL) {
-		printf("%s ", curr->word);
-		if (count == index) {
+		// printf("%s ", curr->word);
+		if (count == index - 1) {
 			return(curr);
 		}
 		count++;
@@ -88,18 +89,22 @@ Word *fetchAtIndex(Word *wordlist, int index) {
 	fprintf(stderr, "fuckup supreme");
 	exit(1);
 
-} */
+}
 
-void *printAtIndex(Word *wordlist, int index) {
+void printAtIndex(Word *wordlist, int index) {
 	Word *curr = wordlist;
 	int count = 0;
 	while (curr != NULL) {
 		if (count == index) {
+			printf("found");
 			printf("%s \n", curr -> word);
+			return;
 		}
 		count++;
 		curr = curr -> next;
 	}
+	printf("found: %s\n", curr -> word);
+
 }
 
 void *printAllWords(Word *wordlist) {
@@ -121,21 +126,22 @@ int decode(FILE *input, FILE *output) {
     	//fprintf(stderr, c);
     	//fputc(c, stderr);
     }
+    read_magicnum[4] = '\0';
     
     fputc('\n', stderr);
     
     // Check magicnum
-    /*
+    
     if (strcmp(read_magicnum, magic_number_1) != 0 
     	&& strcmp(read_magicnum, magic_number_2) != 0) {
     		fprintf(stderr, "Error: magic number not found!");
     		exit(1);
-    }*/
+    }
     
     int c;
     int wordlistcount = 0;
-    Word *wordlist;
-    // need linkdlist for words
+    Word *wordlist = NULL; // holy frig didn't explicitly set this to null and it 
+    					   // totally destroyed my linkedlist functions
 
     // read
 
@@ -274,18 +280,27 @@ int decode(FILE *input, FILE *output) {
     			wordlist = prepend(wordlist, new);
     			printf("New word: %s \n", new->word);
     			fputs(new->word, output);
-				// printf("to file: %s \n", word);
-
-
-    			// printf("\n");
+    			fputc(' ', output);
 
     			wordlistcount++;
 			
     		} else {
-    			printf("Old word, index: %d \n", c-128);
-    			//printAtIndex(wordlist, c-128);
-    			//char *oldword = fetchAtIndex(wordlist, c-128)->word;
-    			//printf("%d", oldword);
+
+    			int n = (c-128);
+    			// printf("lookup index %d", n);
+    			char *oldword = fetchAtIndex(wordlist, n)->word;
+    			printf("Old word: %s \n", oldword); // debug
+    			
+    			// MTF stuff
+    			Word *mtf = newWord(oldword);
+    			wordlist = removeWord(wordlist, oldword);
+    			wordlist = prepend(wordlist, mtf);
+
+    			fputs(oldword, output);
+    			fputc(' ', output);
+
+
+
 
 
     			c = fgetc(input);
@@ -293,9 +308,7 @@ int decode(FILE *input, FILE *output) {
     			// Not a new word
     			// resolve symbol into wordlist index
 
-    			// do MTF stuff
-    				// Delete word from LL
-    				// Put word at front of LL
+
 
     			// Write out the word
     			// Add a space between words
@@ -306,6 +319,8 @@ int decode(FILE *input, FILE *output) {
 
     }
 
+    // printAtIndex(wordlist, 15);
+    printf("\n");
     printAllWords(wordlist);
 	return 0;
 
